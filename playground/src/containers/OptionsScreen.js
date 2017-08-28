@@ -20,13 +20,14 @@ class OptionsScreen extends Component {
     this.onClickShowTopBar = this.onClickShowTopBar.bind(this);
     this.onClickHideTopBar = this.onClickHideTopBar.bind(this);
     this.onClickScrollViewScreen = this.onClickScrollViewScreen.bind(this);
+    this.detectHorizontal = this.detectHorizontal.bind(this);
 
     this.state = { horizontal: false };
   }
 
   render() {
     return (
-      <View style={styles.root} onLayout={this.detectHorizontal.bind(this)}>
+      <View style={styles.root} onLayout={this.detectHorizontal}>
         <Text style={styles.h1}>{`Options Screen`}</Text>
         <Button title="Dynamic Options" onPress={this.onClickDynamicOptions} />
         <Button title="Show Top Bar" onPress={this.onClickShowTopBar} />
