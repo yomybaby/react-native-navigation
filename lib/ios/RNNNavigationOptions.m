@@ -4,6 +4,7 @@
 #import "RNNTabBarController.h"
 
 const NSInteger BLUR_STATUS_TAG = 78264801;
+const NSInteger BLUR_TOPBAR_TAG = 78264802;
 
 @implementation RNNNavigationOptions
 
@@ -30,7 +31,8 @@ const NSInteger BLUR_STATUS_TAG = 78264801;
 	self.rightButtons = [navigationOptions objectForKey:@"rightButtons"];
 	self.topBarNoBorder = [navigationOptions objectForKey:@"topBarNoBorder"];
 	self.tabBarHidden = [navigationOptions objectForKey:@"tabBarHidden"];
-	
+	self.topBarBlur = [navigationOptions objectForKey:@"topBarBlur"];
+
 	return self;
 }
 
@@ -138,6 +140,30 @@ const NSInteger BLUR_STATUS_TAG = 78264801;
 			if (curBlurView) {
 				[curBlurView removeFromSuperview];
 			}
+		}
+	}
+	
+	if (self.topBarBlur && [self.topBarBlur boolValue]) {
+		
+		if (![viewController.navigationController.navigationBar viewWithTag:BLUR_TOPBAR_TAG]) {
+			
+			[viewController.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+			viewController.navigationController.navigationBar.shadowImage = [UIImage new];
+			UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+			CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
+			blur.frame = CGRectMake(0, -1 * statusBarFrame.size.height, viewController.navigationController.navigationBar.frame.size.width, viewController.navigationController.navigationBar.frame.size.height + statusBarFrame.size.height);
+			blur.userInteractionEnabled = NO;
+			blur.tag = BLUR_TOPBAR_TAG;
+			[viewController.navigationController.navigationBar insertSubview:blur atIndex:0];
+			[viewController.navigationController.navigationBar sendSubviewToBack:blur];
+		}
+		
+	} else {
+		UIView *blur = [viewController.navigationController.navigationBar viewWithTag:BLUR_TOPBAR_TAG];
+		if (blur) {
+			[viewController.navigationController.navigationBar setBackgroundImage: nil forBarMetrics:UIBarMetricsDefault];
+			viewController.navigationController.navigationBar.shadowImage = nil;
+			[blur removeFromSuperview];
 		}
 	}
 }

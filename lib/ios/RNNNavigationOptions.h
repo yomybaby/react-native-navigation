@@ -2,6 +2,7 @@
 #import <UIKit/UIKit.h>
 
 extern const NSInteger BLUR_STATUS_TAG;
+extern const NSInteger BLUR_TOPBAR_TAG;
 
 @interface RNNNavigationOptions : NSObject
 
@@ -24,6 +25,7 @@ extern const NSInteger BLUR_STATUS_TAG;
 @property (nonatomic, strong) NSNumber* statusBarBlur;
 @property (nonatomic, strong) NSNumber* statusBarHideWithTopBar;
 @property (nonatomic, strong) NSNumber* tabBarHidden;
+@property (nonatomic, strong) NSNumber* topBarBlur;
 
 
 - (UIInterfaceOrientationMask)supportedOrientations;
