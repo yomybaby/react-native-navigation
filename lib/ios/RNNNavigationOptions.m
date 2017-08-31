@@ -3,6 +3,8 @@
 #import "RNNNavigationController.h"
 #import "RNNTabBarController.h"
 
+const NSInteger BLUR_STATUS_TAG = 78264801;
+
 @implementation RNNNavigationOptions
 
 -(instancetype)init {
@@ -23,7 +25,11 @@
 	self.topBarTranslucent = [navigationOptions objectForKey:@"topBarTranslucent"];
 	self.tabBadge = [navigationOptions objectForKey:@"tabBadge"];
 	self.topBarTextFontSize = [navigationOptions objectForKey:@"topBarTextFontSize"];
-	self.supportedOrientations = [navigationOptions objectForKey:@"supportedOrientations"];
+	self.orientation = [navigationOptions objectForKey:@"orientation"];
+	self.leftButtons = [navigationOptions objectForKey:@"leftButtons"];
+	self.rightButtons = [navigationOptions objectForKey:@"rightButtons"];
+	self.topBarNoBorder = [navigationOptions objectForKey:@"topBarNoBorder"];
+	self.tabBarHidden = [navigationOptions objectForKey:@"tabBarHidden"];
 	
 	return self;
 }
@@ -91,14 +97,14 @@
 	} else {
 		viewController.navigationController.navigationBar.tintColor = nil;
 	}
-      
+	
 	if (self.tabBadge) {
 		NSString *badge = [RCTConvert NSString:self.tabBadge];
 		if (viewController.navigationController) {
 			viewController.navigationController.tabBarItem.badgeValue = badge;
 		} else {
 			viewController.tabBarItem.badgeValue = badge;
-	  }
+		}
 	}
 	
 	if (self.topBarTranslucent) {
@@ -106,18 +112,43 @@
 			viewController.navigationController.navigationBar.translucent = YES;
 		} else {
 			viewController.navigationController.navigationBar.translucent = NO;
-		}		
+		}
 	}
 	
-	[self applySupportedOrientations:self.supportedOrientations on:viewController];
+	if (self.topBarNoBorder) {
+		if ([self.topBarNoBorder boolValue]) {
+			viewController.navigationController.navigationBar
+			.shadowImage = [[UIImage alloc] init];
+		} else {
+			viewController.navigationController.navigationBar
+			.shadowImage = nil;
+		}
+	}
+	
+	if (self.statusBarBlur) {
+		UIView* curBlurView = [viewController.view viewWithTag:BLUR_STATUS_TAG];
+		if ([self.statusBarBlur boolValue]) {
+			if (!curBlurView) {
+				UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+				blur.frame = [[UIApplication sharedApplication] statusBarFrame];
+				blur.tag = BLUR_STATUS_TAG;
+				[viewController.view insertSubview:blur atIndex:0];
+			}
+		} else {
+			if (curBlurView) {
+				[curBlurView removeFromSuperview];
+			}
+		}
+	}
 }
 
-- (void)applySupportedOrientations:(NSArray *)supportedOrientations on:(UIViewController *)viewController {
+- (UIInterfaceOrientationMask)supportedOrientations {
+	NSArray* orientationsArray = [self.orientation isKindOfClass:[NSString class]] ? @[self.orientation] : self.orientation;
 	NSUInteger supportedOrientationsMask = 0;
-	if (!supportedOrientations) {
-		supportedOrientationsMask = [[UIApplication sharedApplication] supportedInterfaceOrientationsForWindow:[[UIApplication sharedApplication] keyWindow]];
+	if (!orientationsArray || [self.orientation isEqual:@"default"]) {
+		return [[UIApplication sharedApplication] supportedInterfaceOrientationsForWindow:[[UIApplication sharedApplication] keyWindow]];
 	} else {
-		for (NSString* orientation in supportedOrientations) {
+		for (NSString* orientation in orientationsArray) {
 			if ([orientation isEqualToString:@"all"]) {
 				supportedOrientationsMask = UIInterfaceOrientationMaskAll;
 				break;
@@ -134,10 +165,8 @@
 		}
 	}
 	
-	if (viewController.tabBarController) {
-		((RNNTabBarController *)viewController.tabBarController).orientation = supportedOrientationsMask;
-	} else
-		((RNNNavigationController *)viewController.navigationController).orientation = supportedOrientationsMask;
+	return supportedOrientationsMask;
 }
+
 
 @end

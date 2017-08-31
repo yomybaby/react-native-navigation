@@ -4,7 +4,7 @@
 @implementation RNNNavigationController
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-	return self.orientation;
+	return self.viewControllers.lastObject.supportedInterfaceOrientations;
 }
 
 @end

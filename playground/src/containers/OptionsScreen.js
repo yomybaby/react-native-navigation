@@ -5,12 +5,28 @@ const { View, Text, Button } = require('react-native');
 
 const Navigation = require('react-native-navigation');
 
+const BUTTON_ONE = 'buttonOne';
+const BUTTON_TWO = 'buttonTwo';
+const BUTTON_LEFT = 'buttonLeft';
+
 class OptionsScreen extends Component {
+
   static get navigationOptions() {
     return {
       title: 'Static Title',
       topBarTextFontFamily: 'HelveticaNeue-Italic',
-      supportedOrientations: ['portrait', 'landscape']
+      rightButtons: [{
+        id: BUTTON_ONE,
+        testID: BUTTON_ONE,
+        title: 'One',
+        buttonColor: 'red'
+      }],
+      leftButtons: [{
+        id: BUTTON_LEFT,
+        testID: BUTTON_LEFT,
+        title: 'Left',
+        buttonColor: 'purple'
+      }]
     };
   }
 
@@ -20,23 +36,48 @@ class OptionsScreen extends Component {
     this.onClickShowTopBar = this.onClickShowTopBar.bind(this);
     this.onClickHideTopBar = this.onClickHideTopBar.bind(this);
     this.onClickScrollViewScreen = this.onClickScrollViewScreen.bind(this);
-    this.detectHorizontal = this.detectHorizontal.bind(this);
-
-    this.state = { horizontal: false };
   }
 
   render() {
     return (
-      <View style={styles.root} onLayout={this.detectHorizontal}>
+      <View style={styles.root}>
         <Text style={styles.h1}>{`Options Screen`}</Text>
         <Button title="Dynamic Options" onPress={this.onClickDynamicOptions} />
         <Button title="Show Top Bar" onPress={this.onClickShowTopBar} />
         <Button title="Hide Top Bar" onPress={this.onClickHideTopBar} />
         <Button title="scrollView Screen" onPress={this.onClickScrollViewScreen} />
         <Text style={styles.footer}>{`this.props.containerId = ${this.props.containerId}`}</Text>
-        <Text style={styles.footer} testID="currentOrientation">{this.state.horizontal ? 'Landscape' : 'Portrait'}</Text>
       </View>
     );
+  }
+
+  onNavigationButtonPressed(id) {
+    if (id === BUTTON_ONE) {
+      Navigation.setOptions(this.props.containerId, {
+        rightButtons: [{
+          id: BUTTON_TWO,
+          testID: BUTTON_TWO,
+          title: 'Two',
+          // icon: require('../../img/navicon_add.png'),
+          // disableIconTint: true,
+          // disabled: true
+          buttonColor: 'green',
+          buttonFontSize: 28,
+          buttonFontWeight: '800'
+        }]
+      });
+    } else if (id === BUTTON_TWO) {
+      Navigation.setOptions(this.props.containerId, {
+        rightButtons: [{
+          id: BUTTON_ONE,
+          testID: BUTTON_ONE,
+          title: 'One',
+          buttonColor: 'red'
+        }]
+      });
+    } else if (id === BUTTON_LEFT) {
+      Navigation.pop(this.props.containerId);
+    }
   }
 
   onClickDynamicOptions() {
@@ -64,12 +105,6 @@ class OptionsScreen extends Component {
   onClickHideTopBar() {
     Navigation.setOptions(this.props.containerId, {
       topBarHidden: true
-    });
-  }
-
-  detectHorizontal({ nativeEvent: { layout: { width, height } } }) {
-    this.setState({
-      horizontal: width > height
     });
   }
 }

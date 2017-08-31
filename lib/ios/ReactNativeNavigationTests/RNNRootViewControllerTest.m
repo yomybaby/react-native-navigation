@@ -6,6 +6,7 @@
 #import "RNNNavigationOptions.h"
 #import "RNNNavigationController.h"
 #import "RNNTabBarController.h"
+#import "RNNUIBarButtonItem.h"
 
 @interface RNNRootViewControllerTest : XCTestCase
 
@@ -60,6 +61,25 @@
 	
 	XCTAssertTrue([self.uut prefersStatusBarHidden]);
 }
+
+- (void)testStatusBarHideWithTopBar_false {
+	self.options.statusBarHideWithTopBar = @(0);
+	self.options.topBarHidden = @(1);
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	
+	XCTAssertFalse([self.uut prefersStatusBarHidden]);
+}
+
+- (void)testStatusBarHideWithTopBar_true {
+	self.options.statusBarHideWithTopBar = @(1);
+	self.options.topBarHidden = @(1);
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+
+	XCTAssertTrue([self.uut prefersStatusBarHidden]);
+}
+
 
 - (void)testStatusBarHidden_false {
 	self.options.statusBarHidden = @(0);
@@ -209,16 +229,25 @@
 
 -(void)testOrientation_portrait {
 	NSArray* supportedOrientations = @[@"portrait"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused UINavigationController* nav = [[RNNNavigationController alloc] initWithRootViewController:self.uut];
 	[self.uut viewWillAppear:false];
 	UIInterfaceOrientationMask expectedOrientation = UIInterfaceOrientationMaskPortrait;
 	XCTAssertTrue(self.uut.navigationController.supportedInterfaceOrientations == expectedOrientation);
 }
 
+-(void)testOrientation_portraitString {
+	NSString* supportedOrientation = @"portrait";
+	self.options.orientation = supportedOrientation;
+	__unused UINavigationController* nav = [[RNNNavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	UIInterfaceOrientationMask expectedOrientation = (UIInterfaceOrientationMaskPortrait);
+	XCTAssertTrue(self.uut.navigationController.supportedInterfaceOrientations == expectedOrientation);
+}
+
 -(void)testOrientation_portraitAndLandscape {
 	NSArray* supportedOrientations = @[@"portrait", @"landscape"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused UINavigationController* nav = [[RNNNavigationController alloc] initWithRootViewController:self.uut];
 	[self.uut viewWillAppear:false];
 	UIInterfaceOrientationMask expectedOrientation = (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskLandscape);
@@ -227,16 +256,26 @@
 
 -(void)testOrientation_all {
 	NSArray* supportedOrientations = @[@"all"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused UINavigationController* nav = [[RNNNavigationController alloc] initWithRootViewController:self.uut];
 	[self.uut viewWillAppear:false];
 	UIInterfaceOrientationMask expectedOrientation = UIInterfaceOrientationMaskAll;
 	XCTAssertTrue(self.uut.navigationController.supportedInterfaceOrientations == expectedOrientation);
 }
 
+-(void)testOrientation_default {
+	NSString* supportedOrientations = @"default";
+	self.options.orientation = supportedOrientations;
+	__unused UINavigationController* nav = [[RNNNavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	UIInterfaceOrientationMask expectedOrientation = [[UIApplication sharedApplication] supportedInterfaceOrientationsForWindow:[[UIApplication sharedApplication] keyWindow]];
+	XCTAssertTrue(self.uut.navigationController.supportedInterfaceOrientations == expectedOrientation);
+}
+
+
 -(void)testOrientationTabsController_portrait {
 	NSArray* supportedOrientations = @[@"portrait"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused RNNTabBarController* vc = [[RNNTabBarController alloc] init];
 	NSMutableArray* controllers = [NSMutableArray new];
 	
@@ -250,7 +289,7 @@
 
 -(void)testOrientationTabsController_portraitAndLandscape {
 	NSArray* supportedOrientations = @[@"portrait", @"landscape"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused RNNTabBarController* vc = [[RNNTabBarController alloc] init];
 	NSMutableArray* controllers = [NSMutableArray new];
 	
@@ -264,7 +303,7 @@
 
 -(void)testOrientationTabsController_all {
 	NSArray* supportedOrientations = @[@"all"];
-	self.options.supportedOrientations = supportedOrientations;
+	self.options.orientation = supportedOrientations;
 	__unused RNNTabBarController* vc = [[RNNTabBarController alloc] init];
 	NSMutableArray* controllers = [NSMutableArray new];
 	
@@ -274,6 +313,123 @@
 	
 	UIInterfaceOrientationMask expectedOrientation = UIInterfaceOrientationMaskAll;
 	XCTAssertTrue(self.uut.tabBarController.supportedInterfaceOrientations == expectedOrientation);
+}
+
+-(void)testRightButtonsWithTitle_withoutStyle {
+	self.options.rightButtons = @[@{@"id": @"testId", @"title": @"test"}];
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	
+	RNNUIBarButtonItem* button = (RNNUIBarButtonItem*)[nav.topViewController.navigationItem.rightBarButtonItems objectAtIndex:0];
+	NSString* expectedButtonId = @"testId";
+	NSString* expectedTitle = @"test";
+	XCTAssertTrue([button.buttonId isEqualToString:expectedButtonId]);
+	XCTAssertTrue([button.title isEqualToString:expectedTitle]);
+	XCTAssertTrue(button.enabled);
+}
+
+-(void)testRightButtonsWithTitle_withStyle {
+	NSNumber* inputColor = @(0xFFFF0000);
+	
+	self.options.rightButtons = @[@{@"id": @"testId", @"title": @"test", @"disabled": @true, @"buttonColor": inputColor, @"buttonFontSize": @22, @"buttonFontWeight": @"800"}];
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	
+	RNNUIBarButtonItem* button = (RNNUIBarButtonItem*)[nav.topViewController.navigationItem.rightBarButtonItems objectAtIndex:0];
+	NSString* expectedButtonId = @"testId";
+	NSString* expectedTitle = @"test";
+	XCTAssertTrue([button.buttonId isEqualToString:expectedButtonId]);
+	XCTAssertTrue([button.title isEqualToString:expectedTitle]);
+	XCTAssertFalse(button.enabled);
+	
+	//TODO: Determine how to tests buttonColor,buttonFontSize and buttonFontWeight?
+}
+
+
+-(void)testLeftButtonsWithTitle_withoutStyle {
+	self.options.leftButtons = @[@{@"id": @"testId", @"title": @"test"}];
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	
+	RNNUIBarButtonItem* button = (RNNUIBarButtonItem*)[nav.topViewController.navigationItem.leftBarButtonItems objectAtIndex:0];
+	NSString* expectedButtonId = @"testId";
+	NSString* expectedTitle = @"test";
+	XCTAssertTrue([button.buttonId isEqualToString:expectedButtonId]);
+	XCTAssertTrue([button.title isEqualToString:expectedTitle]);
+	XCTAssertTrue(button.enabled);
+}
+
+-(void)testLeftButtonsWithTitle_withStyle {
+	NSNumber* inputColor = @(0xFFFF0000);
+	
+	self.options.leftButtons = @[@{@"id": @"testId", @"title": @"test", @"disabled": @true, @"buttonColor": inputColor, @"buttonFontSize": @22, @"buttonFontWeight": @"800"}];
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	
+	RNNUIBarButtonItem* button = (RNNUIBarButtonItem*)[nav.topViewController.navigationItem.leftBarButtonItems objectAtIndex:0];
+	NSString* expectedButtonId = @"testId";
+	NSString* expectedTitle = @"test";
+	XCTAssertTrue([button.buttonId isEqualToString:expectedButtonId]);
+	XCTAssertTrue([button.title isEqualToString:expectedTitle]);
+	XCTAssertFalse(button.enabled);
+	
+	//TODO: Determine how to tests buttonColor,buttonFontSize and buttonFontWeight?
+}
+
+-(void)testTopBarNoBorderOn {
+	NSNumber* topBarNoBorderInput = @(1);
+	self.options.topBarNoBorder = topBarNoBorderInput;
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	XCTAssertNotNil(self.uut.navigationController.navigationBar.shadowImage);
+}
+
+-(void)testTopBarNoBorderOff {
+	NSNumber* topBarNoBorderInput = @(0);
+	self.options.topBarNoBorder = topBarNoBorderInput;
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	XCTAssertNil(self.uut.navigationController.navigationBar.shadowImage);
+}
+
+-(void)testStatusBarBlurOn {
+	NSNumber* statusBarBlurInput = @(1);
+	self.options.statusBarBlur = statusBarBlurInput;
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	XCTAssertNotNil([self.uut.view viewWithTag:BLUR_STATUS_TAG]);
+}
+
+-(void)testStatusBarBlurOff {
+	NSNumber* statusBarBlurInput = @(0);
+	self.options.statusBarBlur = statusBarBlurInput;
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+	XCTAssertNil([self.uut.view viewWithTag:BLUR_STATUS_TAG]);
+}
+
+- (void)testTabBarHidden_default {
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+
+	XCTAssertFalse([self.uut hidesBottomBarWhenPushed]);
+}
+
+
+- (void)testTabBarHidden_true {
+	self.options.tabBarHidden = @(1);
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+
+	XCTAssertTrue([self.uut hidesBottomBarWhenPushed]);
+}
+
+- (void)testTabBarHidden_false {
+	self.options.tabBarHidden = @(0);
+	__unused UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.uut];
+	[self.uut viewWillAppear:false];
+
+	XCTAssertFalse([self.uut hidesBottomBarWhenPushed]);
 }
 
 @end

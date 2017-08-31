@@ -1,13 +1,12 @@
 
 #import "RNNRootViewController.h"
 #import <React/RCTConvert.h>
-
+#import "RNNNavigationButtons.h"
 
 @interface RNNRootViewController()
-@property (nonatomic, strong) NSString* containerId;
 @property (nonatomic, strong) NSString* containerName;
-@property (nonatomic, strong) RNNEventEmitter *eventEmitter;
 @property (nonatomic) BOOL _statusBarHidden;
+@property (nonatomic, strong) RNNNavigationButtons* navigationButtons;
 
 @end
 
@@ -30,6 +29,7 @@
 												 name:RCTJavaScriptWillStartLoadingNotification
 											   object:nil];
 	
+	self.navigationButtons = [[RNNNavigationButtons alloc] initWithViewController:self];
 	
 	return self;
 }
@@ -37,10 +37,28 @@
 -(void)viewWillAppear:(BOOL)animated{
 	[super viewWillAppear:animated];
 	[self.navigationOptions applyOn:self];
+	[self applyNavigationButtons];
 }
 
 - (BOOL)prefersStatusBarHidden {
-	return [self.navigationOptions.statusBarHidden boolValue]; // || self.navigationController.isNavigationBarHidden;
+	if ([self.navigationOptions.statusBarHidden boolValue]) {
+		return YES;
+	} else if ([self.navigationOptions.statusBarHideWithTopBar boolValue]) {
+		return self.navigationController.isNavigationBarHidden;
+	}
+	return NO;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+	return self.navigationOptions.supportedOrientations;
+}
+
+- (BOOL)hidesBottomBarWhenPushed
+{
+	if (self.navigationOptions.tabBarHidden) {
+		return [self.navigationOptions.tabBarHidden boolValue];
+	}
+	return NO;
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -51,6 +69,10 @@
 -(void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
 	[self.eventEmitter sendContainerDidDisappear:self.containerId];
+}
+
+-(void) applyNavigationButtons{
+	[self.navigationButtons applyLeftButtons:self.navigationOptions.leftButtons rightButtons:self.navigationOptions.rightButtons];
 }
 
 /**

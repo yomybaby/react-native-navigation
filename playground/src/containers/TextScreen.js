@@ -8,7 +8,7 @@ const Navigation = require('react-native-navigation');
 class TextScreen extends Component {
   static get navigationOptions() {
     return {
-      supportedOrientations: ['landscape']
+      orientation: ['landscape']
     };
   }
 

@@ -3,6 +3,4 @@
 
 @interface RNNTabBarController : UITabBarController
 
-@property (nonatomic) UIInterfaceOrientationMask orientation;
-
 @end

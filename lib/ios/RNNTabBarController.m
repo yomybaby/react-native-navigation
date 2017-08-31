@@ -4,7 +4,7 @@
 @implementation RNNTabBarController
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-	return self.orientation;
+	return self.selectedViewController.supportedInterfaceOrientations;
 }
 
 @end

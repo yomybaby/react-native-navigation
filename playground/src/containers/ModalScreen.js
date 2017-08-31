@@ -10,7 +10,7 @@ const Navigation = require('react-native-navigation');
 class ModalScreen extends Component {
   static get navigationOptions() {
     return {
-      supportedOrientations: ['portrait']
+      orientation: ['portrait']
     };
   }
 
@@ -50,7 +50,7 @@ class ModalScreen extends Component {
           modalPosition: this.getModalPosition() + 1,
           previousModalIds: _.concat([], this.props.previousModalIds || [], this.props.containerId)
         },
-        supportedOrientations: ['landscape']
+        orientation: ['landscape']
       }
     });
   }
