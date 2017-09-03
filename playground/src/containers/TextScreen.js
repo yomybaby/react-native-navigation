@@ -19,6 +19,7 @@ class TextScreen extends Component {
         {this.renderTextFromFunctionInProps()}
         <Text style={styles.footer}>{`this.props.containerId = ${this.props.containerId}`}</Text>
         <Button title={'Set Tab Badge'} onPress={() => this.onButtonPress()} />
+        <Button title="Switch To Tab 2" onPress={() => this.onClickSwitchToTab()} />
       </View>
     );
   }
@@ -36,6 +37,10 @@ class TextScreen extends Component {
     Navigation.setOptions(this.props.containerId, {
       tabBadge: `EnCyClOpEdIa`
     });
+  }
+
+  onClickSwitchToTab() {
+    Navigation.switchToTab(this.props.containerId, 1);
   }
 }
 module.exports = TextScreen;
