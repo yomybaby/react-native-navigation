@@ -644,6 +644,16 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
       self.navigationItem.titleView.clipsToBounds = YES;
     }
   }
+  
+  if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11.0) {
+    NSNumber *prefersLargeTitles = self.navigatorStyle[@"prefersLargeTitles"];
+    BOOL prefersLargeTitlesBool = prefersLargeTitles ? [prefersLargeTitles boolValue] : NO;
+    if (prefersLargeTitlesBool) {
+      [self.navigationController.navigationBar setPrefersLargeTitles:YES];
+    } else {
+      [self.navigationController.navigationBar setPrefersLargeTitles:NO];
+    }
+  }
 }
 
 
