@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import ReactNative, {AppRegistry, NativeModules, processColor} from 'react-native';
 import _ from 'lodash';
+import PropRegistry from './../PropRegistry';
 
 import Navigation from './../Navigation';
 
@@ -80,7 +81,7 @@ function navigatorPush(navigator, params) {
   adapted.overrideBackPress = params.overrideBackPress;
   adapted.timestamp = Date.now();
 
-  newPlatformSpecific.push(adapted);
+  return newPlatformSpecific.push(adapted);
 }
 
 function navigatorPop(navigator, params) {
@@ -138,6 +139,7 @@ function convertStyleParams(originalStyleObject) {
 
   let ret = {
     orientation: originalStyleObject.orientation,
+    screenAnimationType: originalStyleObject.screenAnimationType,
     statusBarColor: processColor(originalStyleObject.statusBarColor),
     statusBarHidden: originalStyleObject.statusBarHidden,
     statusBarTextColorScheme: originalStyleObject.statusBarTextColorScheme,
@@ -329,6 +331,11 @@ function navigatorSetButtons(navigator, navigatorEventID, _params) {
       }
       if (button.buttonColor) {
         button.color = processColor(button.buttonColor);
+      }
+      if (button.component) {
+        const passPropsKey = _.uniqueId('customButtonComponent');
+        PropRegistry.save(passPropsKey, button.passProps);
+        button.passProps = {passPropsKey};
       }
     });
   }
@@ -589,12 +596,21 @@ function getFab(screen) {
   if (fab.backgroundColor) {
     fab.backgroundColor = processColor(fab.backgroundColor);
   }
+  if (fab.collapsedIconColor) {
+    fab.collapsedIconColor = processColor(fab.collapsedIconColor);
+  }
+  if (fab.expendedIconColor) {
+    fab.expendedIconColor = processColor(fab.expendedIconColor);
+  }
 
   if (fab.actions) {
     _.forEach(fab.actions, (action) => {
       action.icon = resolveAssetSource(action.icon).uri;
       if (action.backgroundColor) {
         action.backgroundColor = processColor(action.backgroundColor)
+      }
+      if (action.iconColor) {
+        action.iconColor = processColor(action.iconColor)
       }
       return action;
     });
