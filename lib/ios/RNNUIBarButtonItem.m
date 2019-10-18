@@ -14,11 +14,7 @@
 @implementation RNNUIBarButtonItem
 
 -(instancetype)init:(NSString*)buttonId withIcon:(UIImage*)iconImage {
-	UIButton* button = [[UIButton alloc] init];
-	[button addTarget:self action:@selector(onButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-	[button setImage:iconImage forState:UIControlStateNormal];
-	[button setFrame:CGRectMake(0, 0, iconImage.size.width, iconImage.size.height)];
-	self = [super initWithCustomView:button];
+	self = [super initWithImage:iconImage style:UIBarButtonItemStylePlain target:nil action:nil];
 	self.buttonId = buttonId;
 	return self;
 }
@@ -70,12 +66,6 @@
 	self.heightConstraint.constant = rootView.intrinsicContentSize.height;
 	[rootView setNeedsUpdateConstraints];
 	[rootView updateConstraintsIfNeeded];
-}
-
-- (void)onButtonPressed {
-	[self.target performSelector:self.action
-					  withObject:self
-					  afterDelay:0];
 }
 
 - (void)dealloc {
